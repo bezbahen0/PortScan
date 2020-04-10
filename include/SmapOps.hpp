@@ -15,10 +15,17 @@ public:
     static SmapOps* instance();
     void deleteSingletone();
     void readOps(int argc, char* argv[]);
+
     std::pair<int, int> portRange();
+
+    std::string host()
+    { return host_; }
+
 private:
     SmapOps();
-    
+
+    std::string host_;
+    std::pair<int, int> portRange_;
     po::options_description desc_;
     po::variables_map vm_;
     static SmapOps* smapOps_;

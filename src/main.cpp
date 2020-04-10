@@ -15,13 +15,13 @@ int main(int argc, char* argv[])
         std::pair<int, int> portRange = ops -> portRange();
 
         boost::asio::io_context io_context;
-        Smap smap(io_context, argv[1], Smap::defaultTimeout);
+        Smap smap(io_context, ops -> host(), Smap::defaultTimeout);
 
         for(int beginPort = portRange.first; beginPort <= portRange.second; ++beginPort)
         {
             smap.startScan(beginPort);
         }
-        std::cout << "Now starting scan to " << argv[1]  << std::endl;
+        std::cout << "Now starting scan to " << ops -> host()  << std::endl;
         io_context.run();
 
         std::cout << "PORT\tSTATE" << std::endl;

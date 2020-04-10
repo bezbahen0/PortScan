@@ -26,7 +26,10 @@ void SmapOps::readOps(int argc, char* argv[])
 {
     try
     {
-        po::store(po::parse_command_line(argc, argv, desc_), vm_);
+        po::positional_options_description p;
+        p.add("hosts", -1);
+        po::store(po::command_line_parser(argc, argv).
+          options(desc_).positional(p).run(), vm_);
         po::notify(vm_);
 
         if(vm_.count("help"))
@@ -34,6 +37,13 @@ void SmapOps::readOps(int argc, char* argv[])
             std::cout << desc_ << std::endl;
             return;
         }
+        if(vm_.count("hosts"))
+        {
+            host_ = vm_["hosts"].as<std::string>();
+        }
+
+
+        portRange_ = portRange();
     }
     catch(std::exception& ex)
     {
@@ -67,6 +77,7 @@ SmapOps::SmapOps()
     desc_.add_options()
         ("help,h", "Print help")
         ("udp,u", "Start udp scanning")
+        ("hosts", po::value<std::string>(), "hosts range or host")
         ("ipv6,6", "Enable Ipv6 scanning")
         ("out,o", po::value<std::string>(), "Create results.txt file")
         ("port-range,p", po::value<std::string>(), "Port range");
