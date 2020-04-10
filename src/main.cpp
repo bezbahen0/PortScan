@@ -1,0 +1,45 @@
+#include <iostream>
+#include <exception>
+
+#include "include/Smap.hpp"
+#include "include/SmapOps.hpp"
+//#include "include/IPv6Header.hpp"
+
+int main(int argc, char* argv[])
+{
+    try
+    {
+        auto ops = SmapOps::instance();
+        ops -> readOps(argc, argv);
+
+        std::pair<int, int> portRange = ops -> portRange();
+
+        boost::asio::io_context io_context;
+        Smap smap(io_context, argv[1], Smap::defaultTimeout);
+
+        for(int beginPort = portRange.first; beginPort <= portRange.second; ++beginPort)
+        {
+            smap.startScan(beginPort);
+        }
+        std::cout << "Now starting scan to " << argv[1]  << std::endl;
+        io_context.run();
+
+        std::cout << "PORT\tSTATE" << std::endl;
+        for (auto pair : smap.portMap()) 
+        {
+            using pstate = Smap::statePort ;
+
+            static std::map<pstate, std::string> const pstr = {
+                {pstate::open,     "open"},     {pstate::closed,  "closed"},
+                {pstate::filtered, "filtered"}, {pstate::aborted, "aborted"}
+            };
+
+            std::cout << pair.first << '\t' << pstr.at(pair.second) << std::endl;
+        }
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << "Exeption: "<< e.what() << std::endl;
+    }
+    return 0;
+}
