@@ -13,7 +13,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using namespace boost;
 
-uint32_t getIfaddr(std::string const& ifname)
+uint32_t getIfaddrIpv4(std::string const& ifname)
 {   
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     struct ifreq ifr;
@@ -159,7 +159,7 @@ std::tuple<int, int> Smap::createSegment(bufferType& buffer, int port)
     ipv4Header.ttl(IPDEFTTL);
     ipv4Header.protocol(IPPROTO_TCP);
     uint32_t daddr = destination_.address().to_v4().to_ulong();
-    ipv4Header.sourceAddress(getIfaddr(rt_.find(daddr) -> ifname));
+    ipv4Header.sourceAddress(getIfaddrIpv4(rtip4_.find(daddr) -> ifname));
     ipv4Header.destinationAddress(daddr);
 
     uint16_t source = rand();

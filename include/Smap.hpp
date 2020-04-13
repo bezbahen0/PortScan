@@ -16,7 +16,8 @@
 #include <boost/asio/streambuf.hpp>
 
 #include "tcp.hpp"
-#include "RouteTable.hpp"
+#include "RouteTableIpv4.hpp"
+#include "RouteTableIpv6.hpp"
 #include "BinaryOptyon.hpp"
 
 using boost::system::error_code; 
@@ -76,7 +77,8 @@ private:
     tcp::socket socket_;
     tcp::endpoint destination_;
     std::map<int, statePort> portMap_;
-    RouteTable rt_;
+    RouteTableIpv4 rtip4_;
+    RouteTableIpv6 rtip6_;
 };
 
 #endif /*Smap_HPP*/
