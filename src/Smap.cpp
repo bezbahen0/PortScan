@@ -13,7 +13,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using namespace boost;
 
-uint32_t getIfaddrIpv4(std::string const& ifname)
+boost::asio::ip::address_v4 getIfaddrIpv4(std::string const& ifname)
 {   
     int fd = socket(AF_INET, SOCK_DGRAM, 0);
     struct ifreq ifr;
@@ -21,7 +21,7 @@ uint32_t getIfaddrIpv4(std::string const& ifname)
     strncpy(ifr.ifr_name, ifname.c_str(), IFNAMSIZ - 1);
     ioctl(fd, SIOCGIFADDR, &ifr);
     close(fd);
-    return ntohl(((struct sockaddr_in *) &ifr.ifr_addr) -> sin_addr.s_addr);
+    return boost::asio::ip::address_v4(ntohl(((struct sockaddr_in *) &ifr.ifr_addr) -> sin_addr.s_addr));
  }
 
 Smap::Smap(boost::asio::io_context& io, const std::string& host, int millisec) :
@@ -158,7 +158,7 @@ std::tuple<int, int> Smap::createSegment(bufferType& buffer, int port)
     ipv4Header.fragmentOffset(IP_DF);
     ipv4Header.ttl(IPDEFTTL);
     ipv4Header.protocol(IPPROTO_TCP);
-    uint32_t daddr = destination_.address().to_v4().to_ulong();
+    asio::ip::address_v4 daddr = destination_.address().to_v4();
     ipv4Header.sourceAddress(getIfaddrIpv4(rtip4_.find(daddr) -> ifname));
     ipv4Header.destinationAddress(daddr);
 

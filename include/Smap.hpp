@@ -17,7 +17,7 @@
 
 #include "tcp.hpp"
 #include "RouteTableIpv4.hpp"
-#include "RouteTableIpv6.hpp"
+//#include "RouteTableIpv6.hpp"
 #include "BinaryOptyon.hpp"
 
 using boost::system::error_code; 
@@ -78,7 +78,7 @@ private:
     tcp::endpoint destination_;
     std::map<int, statePort> portMap_;
     RouteTableIpv4 rtip4_;
-    RouteTableIpv6 rtip6_;
+//    RouteTableIpv6 rtip6_;
 };
 
 #endif /*Smap_HPP*/

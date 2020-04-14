@@ -15,7 +15,7 @@ RouteTableIpv4::const_iterator RouteTableIpv4::defaultRouteIpv4() const
     return std::find_if(rilist_.begin(), rilist_.end(), [](RouteInfoIpv4 const& ri){ return ri.dest.to_ulong() == 0x00000000; });
 }
 
-RouteTableIpv4::const_iterator RouteTableIpv4::find(uint32_t target) const
+RouteTableIpv4::const_iterator RouteTableIpv4::find(boost::asio::ip::address_v4 target) const
 {
     const_iterator defaultrt = defaultRouteIpv4();
     const_iterator it = rilist_.begin();
@@ -23,7 +23,7 @@ RouteTableIpv4::const_iterator RouteTableIpv4::find(uint32_t target) const
     for(; it != rilist_.end(); ++it)
     {
         if(it == defaultrt) continue;
-        if((target & it -> netmask.to_ulong()) == it -> dest.to_ulong())
+        if(boost::asio::ip::address_v4::broadcast(target, it -> netmask) == it -> dest)
         {
             break;
         }

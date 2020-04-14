@@ -33,7 +33,7 @@ public:
     RouteTableIpv4();
     
     const_iterator defaultRouteIpv4() const;
-    const_iterator find(uint32_t target) const;
+    const_iterator find(boost::asio::ip::address_v4 target) const;
 
 private:
     std::istream& initStream(std::istream& is);
