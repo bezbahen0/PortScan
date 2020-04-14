@@ -1,5 +1,6 @@
 #include "include/RouteTableIpv6.hpp"
 
+#include <iostream>
 std::string toReadIpv6(std::string& str)
 {
     for(unsigned i = 4; i != str.size(); i += 5)
@@ -16,17 +17,18 @@ RouteTableIpv6::RouteTableIpv6()
     for(RouteInfoIpv6 ri; readRouteInfo(RouteTableIpv6Proc, ri);)
     {
         rilist_.push_back(ri);
+        break;
     }
 }
 
-RouteTableIpv6::const_iterator RouteTableIpv6::defaultRouteIpv6() const
+RouteTableIpv6::const_iterator RouteTableIpv6::defaultRouteIpv6() const  
 {
-    return std::for_each(rilist_.begin(), rilist_.end(), [](RouteInfoIpv6 const& ri){ return ri.dest == boost::asio::ip::address_v6(); });
+    return std::find_if(rilist_.begin(), rilist_.end(), [](RouteInfoIpv6 const& ri){ return ri.dest == boost::asio::ip::address_v6(); });
 }
 
 RouteTableIpv6::const_iterator RouteTableIpv6::find(boost::asio::ip::address_v6 target) const
 {
-    const_iterator defaultrt = defaultRouteIpv4();
+    const_iterator defaultrt = defaultRouteIpv6();
     const_iterator it = rilist_.begin();
 
     for(; it != rilist_.end(); ++it)
@@ -37,8 +39,7 @@ RouteTableIpv6::const_iterator RouteTableIpv6::find(boost::asio::ip::address_v6 
             break;
         }
     }
-    
-    return (it == rilist_.end()) ? defaultrt : it
+    return (it == rilist_.end()) ? defaultrt : it;
 }
 
 std::istream& RouteTableIpv6::initStream(std::istream& is)
@@ -60,6 +61,5 @@ std::ifstream& RouteTableIpv6::readRouteInfo(std::ifstream& is, RouteInfoIpv6& r
     ri.dest = boost::asio::ip::make_address_v6(toReadIpv6(destination));
     ri.source = boost::asio::ip::make_address_v6(toReadIpv6(source));
     ri.nextHop = boost::asio::ip::make_address_v6(toReadIpv6(nextHop));
-
     return is;
 }

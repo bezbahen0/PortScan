@@ -17,7 +17,7 @@
 
 #include "tcp.hpp"
 #include "RouteTableIpv4.hpp"
-//#include "RouteTableIpv6.hpp"
+#include "RouteTableIpv6.hpp"
 #include "BinaryOptyon.hpp"
 
 using boost::system::error_code; 
@@ -68,7 +68,8 @@ private:
     void handleScan(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer);
     void handleReceive(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer, sharedTimer timer);
     void timeout(error_code const& ec, scanInfo info, sharedTimer timer);
-    std::tuple<int, int> createSegment(bufferType& buffer, int port);
+    std::tuple<int, int> createSegmentIpv4(bufferType& buffer, int port);
+    std::tuple<int, int> createSegmentIpv6(bufferType& buffer, int port);
     void addMap(int keyPort, statePort stateport);
 
     int timeoutMilisecond_;
@@ -78,7 +79,7 @@ private:
     tcp::endpoint destination_;
     std::map<int, statePort> portMap_;
     RouteTableIpv4 rtip4_;
-//    RouteTableIpv6 rtip6_;
+    RouteTableIpv6 rtip6_;
 };
 
 #endif /*Smap_HPP*/

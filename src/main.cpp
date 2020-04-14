@@ -3,7 +3,6 @@
 
 #include "include/Smap.hpp"
 #include "include/SmapOps.hpp"
-//#include "include/IPv6Header.hpp"
 
 int main(int argc, char* argv[])
 {

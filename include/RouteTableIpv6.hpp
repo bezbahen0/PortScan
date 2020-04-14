@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <boost/asio/ip/address_v6.hpp>
 
-struct RouteInfoIpv6
+struct RouteInfoIpv6 
 {
     boost::asio::ip::address_v6 dest;
     uint16_t destPrefix;
