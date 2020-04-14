@@ -12,7 +12,7 @@ RouteTableIpv4::RouteTableIpv4()
 
 RouteTableIpv4::const_iterator RouteTableIpv4::defaultRouteIpv4() const
 {
-    return std::find_if(rilist_.begin(), rilist_.end(), [](RouteInfoIpv4 const& ri){ return ri.dest.to_ulong() == 0x00000000; });
+    return std::find_if(rilist_.begin(), rilist_.end(), [](RouteInfoIpv4 const& ri){ return ri.dest == boost::asio::ip::address_v4(); });
 }
 
 RouteTableIpv4::const_iterator RouteTableIpv4::find(boost::asio::ip::address_v4 target) const
