@@ -32,7 +32,7 @@ public:
 
     RouteTableIpv6();
     const_iterator defaultRouteIpv6() const;
-    const_iterator find() const;
+    const_iterator find(boost::asio::ip::address_v6 target) const;
 
 private:
     std::istream& initStream(std::istream& is);
