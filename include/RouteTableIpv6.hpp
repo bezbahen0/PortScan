@@ -35,8 +35,8 @@ public:
     const_iterator find(boost::asio::ip::address_v6 target) const;
 
 private:
-    std::istream& initStream(std::istream& is);
-    std::ifstream& readRouteInfo(std::ifstream& is, RouteInfoIpv6& ri);
+    auto initStream(std::istream& is) -> decltype(is);
+    auto readRouteInfo(std::ifstream& is, RouteInfoIpv6& ri) -> decltype(is);
 
 
     rilist rilist_;

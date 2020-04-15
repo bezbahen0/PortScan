@@ -2,6 +2,9 @@
 #define IPV4_HPP
 
 #include <netinet/ip.h>
+
+#include "include/utils.hpp"
+
 /*struct ipv4hdr
 {
     unsigned int version : 4;
@@ -24,33 +27,33 @@ class IPv4Header
     using headerType = struct iphdr;
 public:
 
-    IPv4Header() : rep_{} {} 
+    IPv4Header() : rep_{} {}
 
-    uint8_t version() const  
+    uint8_t version() const
     { return rep_.version; }
 
-    uint8_t headerLength() const 
+    uint8_t headerLength() const
     { return rep_.ihl; }
 
-    uint8_t typeOfService() const 
+    uint8_t typeOfService() const
     { return rep_.tos; }
 
-    uint16_t totalLength() const 
+    uint16_t totalLength() const
     { return ntohs(rep_.tot_len); }
 
-    uint16_t id() const 
+    uint16_t id() const
     { return ntohs(rep_.id); }
 
-    uint16_t fragmentOffset() const 
+    uint16_t fragmentOffset() const
     { return ntohs(rep_.frag_off); }
     
-    uint8_t ttl() const 
+    uint8_t ttl() const
     { return rep_.ttl; }
 
-    uint8_t protocol() const 
+    uint8_t protocol() const
     { return rep_.protocol; }
 
-    uint16_t checksum() const 
+    uint16_t checksum() const
     { return ntohs(rep_.check); }
 
     boost::asio::ip::address_v4 sourceAddress() const
@@ -90,13 +93,13 @@ public:
     { rep_.check= htons(check); }
     
     void checksum()
-    {  
+    {
         checksum(0);
-        checksum( checksum(reinterpret_cast<uint16_t*>(&rep_), length()) );
+        checksum( utils::checksum(reinterpret_cast<uint16_t*>(&rep_), length()) );
     }
 
     void sourceAddress(uint32_t sourceAddress)
-    { 
+    {
         rep_.saddr = htonl(sourceAddress);
     }
 
@@ -106,7 +109,7 @@ public:
     }
 
     void sourceAddress(boost::asio::ip::address_v4 sourceAddress)
-    { 
+    {
         rep_.saddr = htonl(sourceAddress.to_ulong());
     }
 
@@ -115,9 +118,9 @@ public:
         rep_.daddr = htonl(destinationAddress.to_ulong());
     }
 
-    char* header() 
+    char* header()
     {
-        return reinterpret_cast<char*>(&rep_); 
+        return reinterpret_cast<char*>(&rep_);
     }
 
     std::size_t length()
@@ -137,22 +140,6 @@ public:
     }
 
 private:
-
-    uint16_t checksum(std::uint16_t *buf, int bufsz)
-    {
-        unsigned long sum = 0;
-        while(bufsz > 1) 
-        {
-            sum += *buf++;
-            bufsz -= 2;
-        }
-        if(bufsz == 1)
-            sum += *(unsigned char *)buf;
-
-        sum = (sum & 0xffff) + (sum >> 16);
-        sum = (sum & 0xffff) + (sum >> 16);
-        return ~sum;
-    }
 
     headerType rep_;
 };

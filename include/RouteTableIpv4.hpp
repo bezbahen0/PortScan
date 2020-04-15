@@ -11,7 +11,7 @@
 struct RouteInfoIpv4
 {
     std::string ifname;
-    boost::asio::ip::address_v4 dest; 
+    boost::asio::ip::address_v4 dest;
     boost::asio::ip::address_v4 gateway;
     boost::asio::ip::address_v4 netmask;
     int refCnt;

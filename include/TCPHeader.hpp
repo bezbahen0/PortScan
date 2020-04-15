@@ -1,6 +1,7 @@
 #ifndef TCPHEADER_HPP
 #define TCPHEADER_HPP
 
+#include "utils.hpp"
 
 /*struct tcpheadr
 {
@@ -58,7 +59,7 @@ public:
     uint16_t rst() const
     { return rep_.rst; }
 
-    uint16_t psh() const 
+    uint16_t psh() const
     { return rep_.psh; }
 
     uint16_t ack() const
@@ -143,15 +144,15 @@ public:
         tc.pseudo.protocol = IPPROTO_TCP;
         tc.pseudo.length   = htons(sizeof(tcphdr));
         tc.tcphdr = rep_;
-        rep_.check = checksum(reinterpret_cast<uint16_t*>(&tc), sizeof(struct tcpChecksum));
+        rep_.check = utils::checksum(reinterpret_cast<uint16_t*>(&tc), sizeof(struct tcpChecksum));
     }
 
     void computeChecksum(const std::string &sourceAddress, const std::string &destinationAddress)
     {
         computeChecksum(
-            boost::asio::ip::address_v4::from_string(sourceAddress).to_ulong(),
-            boost::asio::ip::address_v4::from_string(destinationAddress).to_ulong()
-        );
+                    boost::asio::ip::address_v4::from_string(sourceAddress).to_ulong(),
+                    boost::asio::ip::address_v4::from_string(destinationAddress).to_ulong()
+                    );
     }
 
     friend std::istream& operator>> (std::istream& is, TCPHeader& header)
@@ -165,34 +166,20 @@ public:
     }
 
 private:
-    struct tcphPseudo 
-    {    
-        uint32_t ipSrc;    
-        uint32_t ipDst;    
-        uint8_t zero;       
-        uint8_t  protocol;  
-        uint16_t length;    
+    struct tcphPseudo
+    {
+        uint32_t ipSrc;
+        uint32_t ipDst;
+        uint8_t zero;
+        uint8_t  protocol;
+        uint16_t length;
     };
 
-    struct tcpChecksum 
+    struct tcpChecksum
     {
         struct tcphPseudo pseudo;
         headerType tcphdr;
     };
-
-    uint16_t checksum(uint16_t *buf, int bufsz)
-    {
-        unsigned long sum = 0;
-        while (bufsz > 1) {
-            sum += *buf++;
-            bufsz -= 2;
-        }
-        if (bufsz == 1)
-            sum += *(unsigned char *)buf;
-        sum = (sum & 0xffff) + (sum >> 16);
-        sum = (sum & 0xffff) + (sum >> 16);
-        return ~sum;
-    }
 
     headerType rep_;
 };

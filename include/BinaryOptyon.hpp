@@ -36,7 +36,7 @@ public:
     { optval_ = value; }
 
     bool get_value() const
-    { return optval_; }      
+    { return optval_; }
 
 private:
     bool optval_ = Init;
