@@ -9,41 +9,25 @@
 #include "include/TCPHeader.hpp"
 #include "include/IPv4Header.hpp"
 #include "include/IPv6Header.hpp"
+#include "include/utils.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-boost::asio::ip::address_v4 getIfaddrIpv4(std::string const& ifname)
-{   
-    int fd = socket(AF_INET, SOCK_DGRAM, 0);
-    struct ifreq ifr;
-    ifr.ifr_addr.sa_family = AF_INET;
-    strncpy(ifr.ifr_name, ifname.c_str(), IFNAMSIZ - 1);
-    ioctl(fd, SIOCGIFADDR, &ifr);
-    close(fd);
-    return boost::asio::ip::address_v4(ntohl(((struct sockaddr_in *) &ifr.ifr_addr) -> sin_addr.s_addr));
-}
 
-boost::asio::ip::address_v6 getIfaddrIpv6(std::string ifname)
-{
-    int fd = socket(AF_INET6, SOCK_DGRAM, 0);
-    struct ifreq ifr;
-    ifr.ifr_addr.sa_family = AF_INET6;
-    strncpy(ifr.ifr_name, ifname.c_str(), IFNAMSIZ - 1);
-    ioctl(fd, SIOCGIFADDR, &ifr);
-    close(fd);
-    return boost::asio::ip::make_address_v6(addrToString(((struct sockaddr_in6 *) &ifr.ifr_addr) -> sin6_addr));
-}
-
-Smap::Smap(boost::asio::io_context& io, const std::string& host, int millisec) :
-    timeoutMilisecond_(millisec), 
+Smap::Smap(boost::asio::io_context& io, const std::string& host, protocolraw::socket::protocol_type protocol, int millisec) :
+    timeoutMilisecond_(millisec),
     io_(io),
-    socket_(io, tcp::v4())
+    socket_(io, protocol),
+    protocol_(protocol)
 {
-    tcp::resolver resolver(io);
-    tcp::resolver::query query(tcp::v4(), host, "", boost::asio::ip::resolver_query_base::numeric_service);
+    protocolraw::resolver resolver(io);
+    protocolraw::resolver::query query(protocol, host, "", boost::asio::ip::resolver_query_base::numeric_service);
     destination_ = *resolver.resolve(query);
-    //socket_.set_option(iphdrincl(true));
+    if(protocol.family() == AF_INET)
+    {
+        socket_.set_option(iphdrincl(true));
+    }
 }
 
 Smap::~Smap()
@@ -57,8 +41,8 @@ void Smap::startScan(int portn)
     createSegmentIpv4(*buffer, portn);
     auto sendTime = chrono::steady_clock::now();
     socket_.async_send_to(buffer -> data(), destination_,
-        std::bind(&Smap::handleScan, this, _1, _2, Smap::scanInfo{portn, sendTime}, buffer)
-    );
+                          std::bind(&Smap::handleScan, this, _1, _2, Smap::scanInfo{portn, sendTime}, buffer)
+                          );
 }
 
 std::map<int, Smap::statePort> const& Smap::portMap() const
@@ -75,9 +59,9 @@ void Smap::startTimer(int millisec, scanInfo info, sharedTimer timer)
 void Smap::startReceive(scanInfo info, sharedTimer timer)
 {
     auto&& buffer = std::make_shared<bufferType>();
-    socket_.async_receive(buffer -> prepare(bufferSize), 
-        std::bind(&Smap::handleReceive, this, _1, _2, info, buffer, timer)
-    );
+    socket_.async_receive(buffer -> prepare(bufferSize),
+                          std::bind(&Smap::handleReceive, this, _1, _2, info, buffer, timer)
+                          );
 }
 
 
@@ -119,12 +103,13 @@ void Smap::handleReceive(error_code const& ec, std::size_t length, scanInfo info
     {
         buffer -> commit(length);
 
-        //IPv4Header ipv4;
+        IPv4Header ipv4;
+        //IPv6Header ipv6;
         TCPHeader tcp;
 
         std::istream is(&(*buffer));
-        is >> tcp; //ipv4 >> tcp;
-
+        is >> ipv4 >> tcp;
+        //is >> ipv6 >> tcp;
         if(tcp.syn() && tcp.ack())
         {
             portMap_[tcp.source()] = statePort::open;
@@ -170,7 +155,7 @@ std::tuple<int, int> Smap::createSegmentIpv4(bufferType& buffer, int port)
     ipv4Header.ttl(IPDEFTTL);
     ipv4Header.protocol(IPPROTO_TCP);
     boost::asio::ip::address_v4 daddr = destination_.address().to_v4();
-    ipv4Header.sourceAddress(getIfaddrIpv4(rtip4_.find(daddr) -> ifname));
+    ipv4Header.sourceAddress(utils::getIfaddrIpv4(rtip4_.find(daddr) -> ifname));
     ipv4Header.destinationAddress(daddr);
 
     uint16_t source = rand();
@@ -202,8 +187,9 @@ std::tuple<int, int> Smap::createSegmentIpv6(bufferType& buffer, int port)
 
     IPv6Header ipv6Header;
     ipv6Header.version(6);
+    ipv6Header.nextheadr(IPPROTO_TCP);
     boost::asio::ip::address_v6 daddr = destination_.address().to_v6();
-    ipv6Header.sourceAddress(getIfaddrIpv6("wlan0"));//rtip6_.find(daddr) -> ifname));
+    ipv6Header.sourceAddress(utils::getIfaddrIpv6(rtip6_.find(daddr) -> ifname));
     ipv6Header.destinationAddress(daddr);
 
     uint16_t source = rand();

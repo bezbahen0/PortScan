@@ -3,9 +3,11 @@
 
 #include <string>
 #include <utility>
-	
+
 #include <boost/core/noncopyable.hpp>
 #include <boost/program_options.hpp>
+
+#include "include/protocolraw.hpp"
 
 namespace po = boost::program_options;
 
@@ -21,6 +23,11 @@ public:
     std::string host()
     { return host_; }
 
+    int family()
+    { return fa_; }
+
+    protocolraw::socket::protocol_type protocol();
+
 private:
     SmapOps();
 
@@ -28,6 +35,11 @@ private:
     std::pair<int, int> portRange_;
     po::options_description desc_;
     po::variables_map vm_;
+
+    int fa_;
+    bool udpscan_;
+    protocolraw::socket::protocol_type pr_;
+
     static SmapOps* smapOps_;
 };
 

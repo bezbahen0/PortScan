@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
         std::pair<int, int> portRange = ops -> portRange();
 
         boost::asio::io_context io_context;
-        Smap smap(io_context, ops -> host(), Smap::defaultTimeout);
+        Smap smap(io_context, ops -> host(), ops -> protocol(), Smap::defaultTimeout);
 
         for(int beginPort = portRange.first; beginPort <= portRange.second; ++beginPort)
         {
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
         io_context.run();
 
         std::cout << "PORT\tSTATE" << std::endl;
-        for (auto pair : smap.portMap()) 
+        for (auto pair : smap.portMap())
         {
             using pstate = Smap::statePort ;
 

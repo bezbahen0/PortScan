@@ -1,14 +1,6 @@
 #include "include/RouteTableIpv6.hpp"
+#include "include/utils.hpp"
 
-#include <iostream>
-std::string toReadIpv6(std::string& str)
-{
-    for(unsigned i = 4; i != str.size(); i += 5)
-    {
-        str.insert(i, ":");
-    }
-    return str;
-}
 
 RouteTableIpv6::RouteTableIpv6()
 {
@@ -42,24 +34,24 @@ RouteTableIpv6::const_iterator RouteTableIpv6::find(boost::asio::ip::address_v6 
     return (it == rilist_.end()) ? defaultrt : it;
 }
 
-std::istream& RouteTableIpv6::initStream(std::istream& is)
+auto RouteTableIpv6::initStream(std::istream& is) -> decltype(is)
 {
     std::string buffer;
     return std::getline(is, buffer);
 }
 
-std::ifstream& RouteTableIpv6::readRouteInfo(std::ifstream& is, RouteInfoIpv6& ri) 
+auto RouteTableIpv6::readRouteInfo(std::ifstream& is, RouteInfoIpv6& ri) -> decltype(is)
 {
     std::string destination;
     std::string source;
     std::string nextHop;
 
     is >> destination >> ri.destPrefix >> source
-       >> std::hex >> ri.sourcePrefix >> nextHop >> std::hex >> ri.metric
-       >> std::dec >> ri.refCnt >> ri.use >> ri.flags >> ri.ifname;
+            >> std::hex >> ri.sourcePrefix >> nextHop >> std::hex >> ri.metric
+            >> std::dec >> ri.refCnt >> ri.use >> ri.flags >> ri.ifname;
 
-    ri.dest = boost::asio::ip::make_address_v6(toReadIpv6(destination));
-    ri.source = boost::asio::ip::make_address_v6(toReadIpv6(source));
-    ri.nextHop = boost::asio::ip::make_address_v6(toReadIpv6(nextHop));
+    ri.dest = boost::asio::ip::make_address_v6(utils::toReadIpv6(destination));
+    ri.source = boost::asio::ip::make_address_v6(utils::toReadIpv6(source));
+    ri.nextHop = boost::asio::ip::make_address_v6(utils::toReadIpv6(nextHop));
     return is;
 }

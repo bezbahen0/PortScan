@@ -14,8 +14,9 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/basic_waitable_timer.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/asio/basic_raw_socket.hpp>
 
-#include "tcp.hpp"
+#include "protocolraw.hpp"
 #include "RouteTableIpv4.hpp"
 #include "RouteTableIpv6.hpp"
 #include "BinaryOptyon.hpp"
@@ -55,14 +56,14 @@ public:
         bufferSize = 1550
     };
 
-    Smap(boost::asio::io_context& io_context, const std::string& host, int millisec);
+    Smap(boost::asio::io_context& io_context, const std::string& host, protocolraw::socket::protocol_type protocol,int millisec);
     ~Smap();
 
     void startScan(int portn);
     std::map<int, statePort> const& portMap() const;
 
 private:
-   
+
     void startTimer(int millisec, scanInfo info, sharedTimer timer);
     void startReceive(scanInfo info, sharedTimer timer);
     void handleScan(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer);
@@ -75,8 +76,9 @@ private:
     int timeoutMilisecond_;
     std::set<int> timeoutPort_;
     boost::asio::io_context& io_;
-    tcp::socket socket_;
-    tcp::endpoint destination_;
+    protocolraw::socket socket_;
+    protocolraw::endpoint destination_;
+    protocolraw::socket::protocol_type protocol_;
     std::map<int, statePort> portMap_;
     RouteTableIpv4 rtip4_;
     RouteTableIpv6 rtip6_;

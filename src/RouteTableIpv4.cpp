@@ -45,8 +45,8 @@ std::ifstream& RouteTableIpv4::readRouteInfo(std::ifstream& is, RouteInfoIpv4& r
     uint32_t netmask;
     
     is >> ri.ifname >> std::hex >> destination >> gateway >> std::dec
-       >> ri.flags >> ri.refCnt >> ri.use >> ri.metric >> std::hex
-       >> netmask >> std::dec >> ri.mtu >> ri.window >> ri.irtt;
+            >> ri.flags >> ri.refCnt >> ri.use >> ri.metric >> std::hex
+            >> netmask >> std::dec >> ri.mtu >> ri.window >> ri.irtt;
 
     ri.dest = boost::asio::ip::address_v4(ntohl(destination));
     ri.gateway = boost::asio::ip::address_v4(ntohl(gateway));
