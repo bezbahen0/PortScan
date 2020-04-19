@@ -42,7 +42,7 @@ boost::asio::ip::address_v4 utils::getIfaddrIpv4(std::string const& ifname)
     return boost::asio::ip::address_v4(ntohl(((struct sockaddr_in *) &ifr.ifr_addr) -> sin_addr.s_addr));
 }
 
-boost::asio::ip::address_v6 utils::getIfaddrIpv6(std::string ifname)
+boost::asio::ip::address_v6 utils::getIfaddrIpv6(std::string const& ifname)
 {
     int fd = socket(AF_INET6, SOCK_DGRAM, 0);
     struct ifreq ifr;
@@ -50,7 +50,7 @@ boost::asio::ip::address_v6 utils::getIfaddrIpv6(std::string ifname)
     strncpy(ifr.ifr_name, ifname.c_str(), IFNAMSIZ - 1);
     ioctl(fd, SIOCGIFADDR, &ifr);
     close(fd);
-    return boost::asio::ip::make_address_v6(addrToString(((struct sockaddr_in6 *) &ifr.ifr_addr) -> sin6_addr));
+    return boost::asio::ip::make_address_v6(utils::addrToString(((struct sockaddr_in6 *) &ifr.ifr_addr) -> sin6_addr));
 }
 
 std::string utils::toReadIpv6(std::string& str)

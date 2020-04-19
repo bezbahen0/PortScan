@@ -1,7 +1,7 @@
 #include "include/RouteTableIpv6.hpp"
 #include "include/utils.hpp"
 
-
+#include <iostream>
 RouteTableIpv6::RouteTableIpv6()
 {
     std::ifstream RouteTableIpv6Proc(procRouteIpv6_);
@@ -31,6 +31,7 @@ RouteTableIpv6::const_iterator RouteTableIpv6::find(boost::asio::ip::address_v6 
             break;
         }
     }
+
     return (it == rilist_.end()) ? defaultrt : it;
 }
 

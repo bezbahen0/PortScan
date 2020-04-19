@@ -4,7 +4,6 @@
 #include <exception>
 
 #include <netinet/in.h>
-
 #include <boost/lexical_cast.hpp>
 
 SmapOps* SmapOps::smapOps_ = nullptr;

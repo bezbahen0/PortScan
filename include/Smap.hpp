@@ -23,12 +23,11 @@
 
 using boost::system::error_code; 
 namespace chrono = std::chrono;
-namespace asio = boost::asio;
 
 class Smap
 {
-    using bufferType = asio::streambuf;
-    using timerType = asio::basic_waitable_timer<chrono::steady_clock>;
+    using bufferType = boost::asio::streambuf;
+    using timerType = boost::asio::basic_waitable_timer<chrono::steady_clock>;
     using sharedTimer = std::shared_ptr<timerType>;
     using sharedBuffer = std::shared_ptr<bufferType>;
 
@@ -69,6 +68,7 @@ private:
     void handleScan(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer);
     void handleReceive(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer, sharedTimer timer);
     void timeout(error_code const& ec, scanInfo info, sharedTimer timer);
+    std::tuple<int, int> createSegment(bufferType& buffer, int port);
     std::tuple<int, int> createSegmentIpv4(bufferType& buffer, int port);
     std::tuple<int, int> createSegmentIpv6(bufferType& buffer, int port);
     void addMap(int keyPort, statePort stateport);

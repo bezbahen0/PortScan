@@ -5,7 +5,6 @@
 #include <linux/ipv6.h>
 
 #include "utils.hpp"
-/*add flowLabel !!!! */
 
 std::string addrToString(struct in6_addr address);
 struct in6_addr stringToAddr(std::string address);

@@ -38,7 +38,7 @@ Smap::~Smap()
 void Smap::startScan(int portn)
 {
     auto buffer = std::make_shared<bufferType>();
-    createSegmentIpv4(*buffer, portn);
+    createSegment(*buffer, portn);
     auto sendTime = chrono::steady_clock::now();
     socket_.async_send_to(buffer -> data(), destination_,
                           std::bind(&Smap::handleScan, this, _1, _2, Smap::scanInfo{portn, sendTime}, buffer)
@@ -103,13 +103,16 @@ void Smap::handleReceive(error_code const& ec, std::size_t length, scanInfo info
     {
         buffer -> commit(length);
 
-        IPv4Header ipv4;
-        //IPv6Header ipv6;
         TCPHeader tcp;
-
         std::istream is(&(*buffer));
-        is >> ipv4 >> tcp;
-        //is >> ipv6 >> tcp;
+        if(protocol_.family() == AF_INET)
+        {
+            IPv4Header ipv4;
+
+        }
+
+        //is >> ipv4 >> tcp;
+        is >> tcp;
         if(tcp.syn() && tcp.ack())
         {
             portMap_[tcp.source()] = statePort::open;
@@ -142,6 +145,15 @@ void Smap::timeout(error_code const& ec, scanInfo info, sharedTimer timer)
     }
 }
 
+std::tuple<int, int> Smap::createSegment(bufferType& buffer,int port)
+{
+    if(protocol_.family() == AF_INET)
+    {
+        return createSegmentIpv4(buffer, port);
+    }
+    return createSegmentIpv6(buffer, port);
+}
+
 std::tuple<int, int> Smap::createSegmentIpv4(bufferType& buffer, int port)
 {
     buffer.consume(buffer.size());
@@ -154,7 +166,7 @@ std::tuple<int, int> Smap::createSegmentIpv4(bufferType& buffer, int port)
     ipv4Header.fragmentOffset(IP_DF);
     ipv4Header.ttl(IPDEFTTL);
     ipv4Header.protocol(IPPROTO_TCP);
-    boost::asio::ip::address_v4 daddr = destination_.address().to_v4();
+    auto daddr = destination_.address().to_v4();
     ipv4Header.sourceAddress(utils::getIfaddrIpv4(rtip4_.find(daddr) -> ifname));
     ipv4Header.destinationAddress(daddr);
 
@@ -182,13 +194,14 @@ std::tuple<int, int> Smap::createSegmentIpv4(bufferType& buffer, int port)
 
 std::tuple<int, int> Smap::createSegmentIpv6(bufferType& buffer, int port)
 {
+
     buffer.consume(buffer.size());
     std::ostream os(&buffer);
 
     IPv6Header ipv6Header;
     ipv6Header.version(6);
     ipv6Header.nextheadr(IPPROTO_TCP);
-    boost::asio::ip::address_v6 daddr = destination_.address().to_v6();
+    auto daddr = destination_.address().to_v6();
     ipv6Header.sourceAddress(utils::getIfaddrIpv6(rtip6_.find(daddr) -> ifname));
     ipv6Header.destinationAddress(daddr);
 
@@ -209,6 +222,7 @@ std::tuple<int, int> Smap::createSegmentIpv6(bufferType& buffer, int port)
     }
     return std::make_tuple(source, seq);
 }
+
 
 void Smap::addMap(int keyPort, statePort stateport)
 {
