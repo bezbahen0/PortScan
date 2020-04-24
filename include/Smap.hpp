@@ -21,20 +21,18 @@
 #include "RouteTableIpv6.hpp"
 #include "BinaryOptyon.hpp"
 
-using boost::system::error_code; 
-namespace chrono = std::chrono;
 
 class Smap
 {
     using bufferType = boost::asio::streambuf;
-    using timerType = boost::asio::basic_waitable_timer<chrono::steady_clock>;
+    using timerType = boost::asio::basic_waitable_timer<std::chrono::steady_clock>;
     using sharedTimer = std::shared_ptr<timerType>;
     using sharedBuffer = std::shared_ptr<bufferType>;
 
     struct scanInfo
     {
         int port;
-        chrono::steady_clock::time_point sendTime;
+        std::chrono::steady_clock::time_point sendTime;
         int seqNum;
         int ownPort;
     };
@@ -65,9 +63,9 @@ private:
 
     void startTimer(int millisec, scanInfo info, sharedTimer timer);
     void startReceive(scanInfo info, sharedTimer timer);
-    void handleScan(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer);
-    void handleReceive(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer, sharedTimer timer);
-    void timeout(error_code const& ec, scanInfo info, sharedTimer timer);
+    void handleScan(boost::system::error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer);
+    void handleReceive(boost::system::error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer, sharedTimer timer);
+    void timeout(boost::system::error_code const& ec, scanInfo info, sharedTimer timer);
     std::tuple<int, int> createSegment(bufferType& buffer, int port);
     std::tuple<int, int> createSegmentIpv4(bufferType& buffer, int port);
     std::tuple<int, int> createSegmentIpv6(bufferType& buffer, int port);

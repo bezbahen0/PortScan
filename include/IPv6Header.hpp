@@ -6,9 +6,6 @@
 
 #include "utils.hpp"
 
-std::string addrToString(struct in6_addr address);
-struct in6_addr stringToAddr(std::string address);
-
 class IPv6Header
 {
     using headerType = struct ipv6hdr;

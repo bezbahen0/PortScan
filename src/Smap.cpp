@@ -39,7 +39,7 @@ void Smap::startScan(int portn)
 {
     auto buffer = std::make_shared<bufferType>();
     createSegment(*buffer, portn);
-    auto sendTime = chrono::steady_clock::now();
+    auto sendTime = std::chrono::steady_clock::now();
     socket_.async_send_to(buffer -> data(), destination_,
                           std::bind(&Smap::handleScan, this, _1, _2, Smap::scanInfo{portn, sendTime}, buffer)
                           );
@@ -52,7 +52,7 @@ std::map<int, Smap::statePort> const& Smap::portMap() const
 
 void Smap::startTimer(int millisec, scanInfo info, sharedTimer timer)
 {
-    timer -> expires_from_now(chrono::milliseconds(millisec));
+    timer -> expires_from_now(std::chrono::milliseconds(millisec));
     timer -> async_wait(std::bind(&Smap::timeout, this, _1, info, timer));
 }
 
@@ -65,7 +65,7 @@ void Smap::startReceive(scanInfo info, sharedTimer timer)
 }
 
 
-void Smap::handleScan(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer)
+void Smap::handleScan(boost::system::error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer)
 {
     if(ec)
     {
@@ -80,7 +80,7 @@ void Smap::handleScan(error_code const& ec, std::size_t length, scanInfo info, s
 }
 
 
-void Smap::handleReceive(error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer, sharedTimer timer)
+void Smap::handleReceive(boost::system::error_code const& ec, std::size_t length, scanInfo info, sharedBuffer buffer, sharedTimer timer)
 {
     if(ec == boost::asio::error::operation_aborted)
     {
@@ -131,7 +131,7 @@ void Smap::handleReceive(error_code const& ec, std::size_t length, scanInfo info
 
 }
 
-void Smap::timeout(error_code const& ec, scanInfo info, sharedTimer timer)
+void Smap::timeout(boost::system::error_code const& ec, scanInfo info, sharedTimer timer)
 {
     if(ec == boost::asio::error::operation_aborted);
     else if(ec)
